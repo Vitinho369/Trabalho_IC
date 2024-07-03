@@ -220,30 +220,37 @@ class GeneticAlgorihnm:
         bestSolve = population[0]
         
         steps = 0
+        bestSolveGeneration = population[0]
+        # Gera as próximas gerações
         while steps < self.epochs:
-            nextGeneration:list[Solve] = []
+            nextGeneration:list[Solve] = [] # reseta dee proximas geracoes 
 
             for _ in range(self.populationSize): # Gera mais 100 outras soluções
                 first_parent = self.rouletteWheel(population)
                 child = first_parent.clone()
                 if random.random() < self.rateCrossover:
                     second_parent = self.rouletteWheel(population)
-                    child.crossover(second_parent)
+                    #child.crossover(second_parent)
                 nextGeneration.append(child)
-            
+
+            # Mutação
             for child in nextGeneration:
                 if random.random() < self.rateMutation:
                     child.mutate()
 
             population = nextGeneration
             steps += 1
-
             bestSolve = population[0]
+            
+            # Verifica a melhor solução da geração atual
             for solve in population:
-                if solve.cost() > bestSolve.cost():
+                if solve.cost() >  bestSolve.cost():
                     bestSolve = solve
-        
-        return bestSolve
+            # Verifica se a melhor solução da geração atual é melhor que a melhor solução de todas as gerações
+            if bestSolve.cost() > bestSolveGeneration.cost():
+                bestSolveGeneration = bestSolve
+        # Retorna a melhor solução de todas as gerações
+        return bestSolveGeneration
 
 
     def rouletteWheel(self, population:list[Solve]) -> Solve:
