@@ -1,6 +1,7 @@
 
 import random
 random.seed(1)
+from collections import Counter
 
 #Problema no crossover, não está gerando filhos válidos, pois está repetindo valores
 #Alterar a função de geração da população inicial
@@ -91,14 +92,13 @@ finalRandom = 79
 
 class Solve:
     def __init__(self):
-        self.encode:list[chr] = []
+        self.encode:set[chr] = []
         self.encode.append('A')
+        ascii_list = [66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
         for _ in range(size):
-            bit = random.randint(initRandom, finalRandom)
-            while chr(bit) in self.encode:
-                bit = random.randint(initRandom, finalRandom)
+            bit = random.choice(ascii_list)
+            ascii_list.remove(bit)
             self.encode.append(chr(bit)) #geraa uma lista de caracteres aleatórios do A ao O
-    
     def copySolve(self, other:'Solve', start = 0, end = size) -> None:
         for i in range(start, end):
             self.encode[i] = other.encode[i]
@@ -177,13 +177,34 @@ class Solve:
         self.encode = child
 
     def mutate(self) -> None:
+        # Mutação por inversão
         positionInitList = random.randrange(0,size)
         positionSecondList = random.randrange(0,size)
-        
-        if positionInitList < positionSecondList:
+        print("---------------------")
+        print("antes")
+        print( self.encode )
+                # Usando Counter para contar as ocorrências de cada letra
+        contagem_letras = Counter(self.encode)
+
+        # Exibindo o resultado
+        for letra, contagem in contagem_letras.items():
+            print(f"A letra '{letra}' aparece {contagem} vezes.")
+        print("---------------------")
+        if positionInitList < positionSecondList and True == False:
+            print("---------------------")
+            print("antes")
+            print( self.encode )
+            print(str(positionInitList) + " - Inicio " + str(positionSecondList) + " - Fim")
             reverse_encode =  self.encode[positionInitList:positionSecondList+1]
-            self.encode[positionInitList:positionSecondList+1] = reverse_encode[::-1]     
-        elif positionInitList > positionSecondList:
+            self.encode[positionInitList:positionSecondList+1] = reverse_encode[::-1] 
+            print( self.encode)    
+            print("depois")
+            print("---------------------")
+        elif positionInitList > positionSecondList and True == False:
+            print("---------------------")
+            print("antes")
+            print( self.encode )
+            print(str(positionInitList) + " - Inicio " + str(positionSecondList) + " - Fim")
             listaux1 = self.encode[positionInitList:size]
             listaux1 = listaux1[::-1]
             listaux2 = self.encode[0:positionSecondList+1]
@@ -198,6 +219,9 @@ class Solve:
             for i in range(positionInitList, size):
                 self.encode[i] = listaux[cont]
                 cont += 1
+            print( self.encode)    
+            print("depois")
+            print("---------------------")
 
     def __repr__(self) -> str:
         c = str(self.cost())
@@ -241,7 +265,7 @@ class GeneticAlgorihnm:
             population = nextGeneration
             steps += 1
             bestSolve = population[0]
-            
+
             # Verifica a melhor solução da geração atual
             for solve in population:
                 if solve.cost() >  bestSolve.cost():
