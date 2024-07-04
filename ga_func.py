@@ -1,7 +1,7 @@
 
 import random
 random.seed(1)
-from collections import Counter
+
 
 #Problema no crossover, não está gerando filhos válidos, pois está repetindo valores
 #Alterar a função de geração da população inicial
@@ -130,19 +130,21 @@ class Solve:
         return self.encode
       
     def crossover(self, other:'Solve') -> None:
-        
         positionInitList = random.randrange(0,size)
         positionSecondList = random.randrange(0,size)
         
+        # inverte valores para garantir que a posição inicial seja menor que a posição final
         if positionInitList > positionSecondList:
             troca = positionInitList
             positionInitList = positionSecondList
             positionSecondList = troca
-         
+
+        # Cria uma lista com os valores do pai 1 e do pai 2
         subEncodeFather1 = self.encode[positionInitList:positionSecondList+1]
         subEncodeFather2 = other.encode[positionInitList:positionSecondList+1]
-
-        child = other.encode.copy()
+        # Cria um filho com os valores do pai 1
+        child = self.encode.copy()
+        # Substitui os valores do filho pelos valores do pai 1
         child[positionInitList:positionSecondList+1] = subEncodeFather1
        
         cont = 0
@@ -152,6 +154,8 @@ class Solve:
             while position not in positions:
                 possiblepositions = [index for index,element  in enumerate(child) if child[position] == element]
                 for j in possiblepositions:
+                    print("Position Init: ", positionInitList)
+                    print("Position Second: ", positionSecondList)
                     print(possiblepositions, positions)
                     print("Father 1: ",self.encode)
                     print("Father 2: ", other.encode)
@@ -168,11 +172,11 @@ class Solve:
                 child[position] = subEncodeFather2[cont]
             cont+=1
             
-        for l in child:
-            if child.count(l) > 1:
-                print(l)
-                print(cont)
-                raise Exception(child)
+        #for l in child:
+           # if child.count(l) > 1:
+             #   print(l)
+             #   print(cont)
+               # raise Exception(child)
             
         self.encode = child
 
@@ -186,7 +190,9 @@ class Solve:
         elif positionInitList > positionSecondList:
             listaux1 = self.encode[positionInitList:size]
             listaux1 = listaux1[::-1]
+
             listaux2 = self.encode[0:positionSecondList+1]
+           # listaux2 = listaux2[::-1]
 
             listaux = listaux2 + listaux1
     
@@ -207,49 +213,62 @@ class Solve:
 
 class GeneticAlgorihnm:
     def __init__(self):
-        self.epochs:int = 100 ## Aumento da épocas para tratar os diferentes valores de cada variável
-        self.populationSize = 100
-        self.rateCrossover:float = 0.95
-        self.rateMutation:float = 0.05 ## Temos apenas duas variáveis, então a taxa de mutação deve ser maior
+        self.parameters = [
+            [30, 50, 100],     # populationSize
+            [0.9, 0.95, 1.0],  # rateCrossover
+            [0.01, 0.1, 0.5],  # rateMutation
+            [100, 1000, 10000] # epochs
+        ]
+        
     
     def run(self) -> Solve:
-        population:list[Solve] = []
-        for _ in range(self.populationSize): # Gera as 100 soluções iniciais
-            solve = Solve()
-            population.append(solve)
-        bestSolve = population[0]
-        
-        steps = 0
-        bestSolveGeneration = population[0]
-        # Gera as próximas gerações
-        while steps < self.epochs:
-            nextGeneration:list[Solve] = [] # reseta dee proximas geracoes 
+        for pop_size in self.parameters[0]:
+            for crossover_rate in self.parameters[1]:
+                for mutation_rate in self.parameters[2]:
+                    for epoch in self.parameters[3]:
+                        population:list[Solve] = []
+                        print("Population Size: ", pop_size)
+                        for _ in range(pop_size): # Gera as 100 soluções iniciais
+                            solve = Solve()
+                            population.append(solve)
+                        bestSolve = population[0]
+                        
+                        steps = 0
+                        bestSolveGeneration = population[0]
+                        # Gera as próximas gerações
+                        while steps < epoch:
+                            nextGeneration:list[Solve] = [] # reseta dee proximas geracoes 
 
-            for _ in range(self.populationSize): # Gera mais 100 outras soluções
-                first_parent = self.rouletteWheel(population)
-                child = first_parent.clone()
-                if random.random() < self.rateCrossover:
-                    second_parent = self.rouletteWheel(population)
-                    #child.crossover(second_parent)
-                nextGeneration.append(child)
+                            for _ in range(pop_size): # Gera mais 100 outras soluções
+                                first_parent = self.rouletteWheel(population)
+                                child = first_parent.clone()
+                                if random.random() < crossover_rate:
+                                    second_parent = self.rouletteWheel(population)
+                                    #child.crossover(second_parent)
+                                nextGeneration.append(child)
 
-            # Mutação
-            for child in nextGeneration:
-                if random.random() < self.rateMutation:
-                    child.mutate()
+                            # Mutação
+                            for child in nextGeneration:
+                                if random.random() < mutation_rate:
+                                    child.mutate()
 
-            population = nextGeneration
-            steps += 1
-            bestSolve = population[0]
+                            population = nextGeneration
+                            steps += 1
+                            bestSolve = population[0]
 
-            # Verifica a melhor solução da geração atual
-            for solve in population:
-                if solve.cost() >  bestSolve.cost():
-                    bestSolve = solve
-            # Verifica se a melhor solução da geração atual é melhor que a melhor solução de todas as gerações
-            if bestSolve.cost() > bestSolveGeneration.cost():
-                bestSolveGeneration = bestSolve
-        # Retorna a melhor solução de todas as gerações
+                            # Verifica a melhor solução da geração atual
+                            for solve in population:
+                                if solve.cost() >  bestSolve.cost():
+                                    bestSolve = solve
+                            # Verifica se a melhor solução da geração atual é melhor que a melhor solução de todas as gerações
+                            if bestSolve.cost() > bestSolveGeneration.cost():
+                                bestSolveGeneration = bestSolve
+                        # Retorna a melhor solução de todas as gerações
+                        print(bestSolveGeneration)
+                        print("Population Size: ", pop_size)
+                        print("Crossover Rate: ", crossover_rate)
+                        print("Mutation Rate: ", mutation_rate)
+                        print("Epoch: ", epoch)
         return bestSolveGeneration
 
 
