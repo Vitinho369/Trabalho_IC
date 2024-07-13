@@ -228,10 +228,10 @@ class GeneticAlgorihnm:
             solve = Solve()
             population.append(solve)
         bestSolve = population[0]
-        
         steps = 0
         bestSolveGeneration = population[0]
         # Gera as próximas gerações
+        print(bestSolveGeneration, "Melhor solução da geração")
         while steps < self.epochs:
             nextGeneration:list[Solve] = [] # reseta dee proximas geracoes 
 

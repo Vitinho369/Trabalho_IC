@@ -226,65 +226,73 @@ class GeneticAlgorihnm:
                 [100, 1000, 10000]]
     
     def run(self) -> Solve:
-        theBestPopulationSizeCost = self.dados[0][0]
-        theBestRateCrossoverCost = self.dados[1][0]
-        theBestRateMutationCost = self.dados[2][0]
-        theBestEpochsCost = self.dados[3][0]
         populationSize = self.dados[0][0]
         rateCrossover = self.dados[1][0]
         rateMutation = self.dados[2][0]
         epochs = self.dados[3][0]
         cache = {}
         theBestSolves = []
-        flag = True
+        flagTwo = True
         saida = []
         for i in range(4):
+            flagTwo = True
             for j in range(3):
                 # Fixar as variáveis de acordo com o melhor custo
                 if i == 0: 
                     populationSize = self.dados[0][j]
                 elif i == 1: 
                     # Seleciona as 3 primeiras melhores soluções
-                    solves =  theBestSolves[:3]
-                    # 
-                    for solve in solves:
-                        if flag: 
-                            if solve['custo'] < theBestPopulationSizeCost:
-                                theBestPopulationSizeCost = solve['custo']
+                    if flagTwo: 
+                        solves =  theBestSolves
+                        menorCusto = solves[0]['custo']
+                        for solve in solves:
+                            if solve['custo'] < menorCusto:
                                 populationSize = solve['populacao']
-                                flag = False
+                                flagTwo = False
+                            elif solve['custo'] > menorCusto:
+                                theBestSolves.remove(solve)
+                        if flagTwo:
+                            populationSize = solves[0]['populacao']
+                            flagTwo = False
+                        print("Population Size: ", populationSize)
                     rateCrossover = self.dados[1][j]
                 elif i == 2:
-                    solves =  theBestSolves[3:6]
-                    if flag: 
-                            if solve['custo'] < theBestRateCrossoverCost:
-                                theBestRateCrossoverCost = solve['custo']
-                                populationSize = solve['populacao']
-                                flag = False
+                    if flagTwo: 
+                        solves =  theBestSolves
+                        menorCusto = solves[0]['custo']
+                        for solve in solves:
+                                if solve['custo'] < menorCusto:
+                                    rateCrossover = solve['crossover']
+                                    flagTwo = False
+                                elif solve['custo'] > menorCusto:
+                                    theBestSolves.remove(solve)
+                        if flagTwo:
+                            rateCrossover = solves[0]['crossover']
+                            flagTwo = False
+                        print("Rate Crossover: ", rateCrossover)
                     rateMutation = self.dados[2][j]
-                elif i == 3:
-                    solves =  theBestSolves[6:9]
-                    if flag:
-                        if solve['custo'] < theBestRateMutationCost:
-                            theBestRateMutationCost = solve['custo']
-                            populationSize = solve['populacao']
-                            flag = False 
+                elif 3:
+                    if flagTwo: 
+                        solves =  theBestSolves
+                        menorCusto = solves[0]['custo']
+                        for solve in solves:
+                            if solve['custo'] < menorCusto:
+                                rateMutation = solve['mutacao']
+                                flagTwo = False
+                            elif solve['custo'] > menorCusto:
+                                theBestSolves.remove(solve)
+                        if flagTwo:
+                            rateMutation = solves[0]['mutacao']
+                            flagTwo = False 
+                        print("Rate Mutation: ", rateMutation)
                     epochs = self.dados[3][j]
-                elif i == 4:
-                    solves =  theBestSolves[9:12]
-                    if flag:
-                        if solve['custo'] > theBestEpochsCost:
-                            theBestEpochsCost = solve['custo']
-                            populationSize = solve['populacao']
-                            flag = False
                 # Verifica se a combinação de parâmetros já foi calculada
                 if (populationSize, rateCrossover, rateMutation, epochs) not in cache:
                     population:list[Solve] = []
-                    for _ in range(populationSize): # Gera as 100 soluções iniciais
+                    for _ in range(populationSize):
                         solve = Solve()
                         population.append(solve)
                     bestSolve = population[0]
-                    
                     steps = 0
                     bestSolveGeneration = population[0]
                     # Gera as próximas gerações
@@ -315,16 +323,16 @@ class GeneticAlgorihnm:
                         # Verifica se a melhor solução da geração atual é melhor que a melhor solução de todas as gerações
                         if bestSolve.cost() > bestSolveGeneration.cost():
                             bestSolveGeneration = bestSolve
-                    saida.append([bestSolveGeneration.cost(), bestSolveGeneration])
-                    cache[(populationSize, rateCrossover, rateMutation, epochs)] = bestSolveGeneration.cost()
+                        
+                    saida.append([bestSolveGeneration.func(), bestSolveGeneration])
+                    # Adiciona a melhor solução de cada combinação de parâmetros
+                    cache[(populationSize, rateCrossover, rateMutation, epochs)] = bestSolveGeneration.func()
                     # Retorna a melhor solução de todas as gerações
-                    theBestSolves.append({"indice i": i, "indice j" : j,"custo": bestSolveGeneration.cost(), "populacao": populationSize, "crossover": rateCrossover, "mutacao": rateMutation, "epocas": epochs})
+                    theBestSolves.append({"indice i": i, "indice j" : j,"custo": bestSolveGeneration.func(), "populacao": populationSize, "crossover": rateCrossover, "mutacao": rateMutation, "epocas": epochs})
         print("-----------------")
         print("Cache: ", cache)
-        print("--------------")
-        melhor_custo, melhor_solucao = min(saida, key=lambda x: x[0])
+        _, melhor_solucao = min(saida, key=lambda x: x[0])
         return melhor_solucao
-
 
     def rouletteWheel(self, population:list[Solve]) -> Solve:
         sum = 0
