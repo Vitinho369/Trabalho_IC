@@ -254,7 +254,8 @@ for i in range(0, 30):
                 # Verifica se a melhor solução da geração atual é melhor que a melhor solução de todas as gerações
                 if bestSolve.cost() > bestSolveGeneration.cost():
                     bestSolveGeneration = bestSolve
-            # Retorna a melhor solução de todas as gerações
+            # Retorna a melhor solução de todas as gerações``
+            global acumulador
             acumulador = acumulador + bestSolveGeneration.func()
             return bestSolveGeneration
 
@@ -274,4 +275,4 @@ for i in range(0, 30):
 
     ga = GeneticAlgorihnm()
     print(ga.run())
-print("Média: ", acumulador/30)
+print("Média: ", round(acumulador/30,2))

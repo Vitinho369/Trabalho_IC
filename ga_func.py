@@ -2,11 +2,6 @@
 
 import random
 random.seed(1)
-from collections import Counter
-
-#Problema no crossover, não está gerando filhos válidos, pois está repetindo valores
-#Alterar a função de geração da população inicial
-# Fixar a primeira cidade como A (Feito)
 
 grafo = {
     ("A","B"): 5,
